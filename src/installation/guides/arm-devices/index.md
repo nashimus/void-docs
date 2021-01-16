@@ -110,6 +110,22 @@ devices, and with `aarch64` for aarch64 devices:
 # proot -q qemu-<platform>-static -r /mnt -w /
 ```
 
+Using chroot and binfmt instead of proot:
+```
+xbps-install -Su binfmt-support
+ln -s /etc/sv/binfmt-support /var/service/
+xbps-install -Su qemu-user-static #binfmt-support service needs to be enabled in order for the binfmt hook in the qemu package to run.
+mount /dev/sdc2 /mnt/
+mount /dev/sdc1 /mnt/boot/
+mount --rbind /sys /mnt/sys && mount --make-rslave /mnt/sys
+mount --rbind /dev /mnt/dev && mount --make-rslave /mnt/dev
+mount --rbind /proc /mnt/proc && mount --make-rslave /mnt/proc
+cp $(which qemu-aarch64-static) /mnt/usr/bin
+cp /etc/resolv.conf /mnt/etc/
+chroot /mnt qemu-aarch64-static /bin/bash
+export PATH=/sbin:/usr/sbin:/usr/bin:/bin
+```
+
 ## Configuration
 
 Some additional configuration steps need to be followed to guarantee a working
